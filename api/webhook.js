@@ -28,15 +28,17 @@ bot.on('text', async (ctx) => {
 
 // Required for Vercel serverless function
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    try {
-      await bot.handleUpdate(req.body);
-    } catch (err) {
-      console.error('Telegram update error:', err.message);
-    }
-    return res.status(200).send('OK');
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
   }
 
-  return res.status(405).send('Method Not Allowed');
+  try {
+    await bot.handleUpdate(req.body);
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('Webhook error:', err);
+    res.status(500).send('Webhook handler error');
+  }
 }
+
 
